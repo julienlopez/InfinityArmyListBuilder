@@ -8,6 +8,15 @@
 }
 
 #armies_list {
-    width: 20%;
+    width: 30%;
     text-align: center;
+}
+
+.army_selection {
+    padding: 5px;
+    cursor: pointer;
+}
+
+.army_selection:hover {
+    background-color: darkslategray;
 }

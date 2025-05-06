@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 
+use closure::closure;
+
 use crate::api::types::Metadata;
 
 const ARMY_LIST_CSS: Asset = asset!("/assets/styling/army_list.css");
@@ -7,6 +9,7 @@ const ARMY_LIST_CSS: Asset = asset!("/assets/styling/army_list.css");
 #[component]
 pub fn ArmyList() -> Element {
     let metadata = use_server_future(echo_server)?;
+    let mut selected_faction: Signal<Option<u64>> = use_signal(|| None);
     rsx! {
         document::Link { rel: "stylesheet", href: ARMY_LIST_CSS }
         div { id: "screen",
@@ -15,7 +18,11 @@ pub fn ArmyList() -> Element {
                     Some(Ok(metadata)) => rsx! {
                         "Armies"
                         for faction in &metadata.factions {
-                            div { "{faction.name}" }
+                            div {
+                                class: "army_selection",
+                                onclick: closure!(clone faction, | _ | { * selected_faction.write() = Some(faction.id); }),
+                                "{faction.name}"
+                            }
                         }
                     },
                     Some(Err(err)) => rsx! {
@@ -24,7 +31,16 @@ pub fn ArmyList() -> Element {
                     None => rsx! { "Ongoing" },
                 }
             }
-            div { "Plop" }
+            div {
+                match &*selected_faction.read() {
+                    Some(faction_id) => {
+                        rsx! {
+                            div { "{faction_id}" }
+                        }
+                    }
+                    None => rsx! { "Plop" },
+                }
+            }
         }
     }
 }
