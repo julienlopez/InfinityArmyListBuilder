@@ -1,5 +1,7 @@
 #![allow(non_snake_case)]
 
+mod api;
+
 use dioxus::prelude::*;
 use dioxus_logger::tracing::{info, Level};
 
@@ -7,8 +9,6 @@ use dioxus_logger::tracing::{info, Level};
 enum Route {
     #[route("/")]
     Home {},
-    #[route("/blog/:id")]
-    Blog { id: i32 },
 }
 
 fn main() {
@@ -18,35 +18,55 @@ fn main() {
     launch(App);
 }
 
+static CSS: Asset = asset!("/assets/main.css");
+
 fn App() -> Element {
     rsx! {
+        document::Stylesheet { href: CSS }
         Router::<Route> {}
     }
 }
 
 #[component]
-fn Blog(id: i32) -> Element {
-    rsx! {
-        Link { to: Route::Home {}, "Go to counter" }
-        "Blog post {id}"
-    }
-}
-
-#[component]
 fn Home() -> Element {
-    let mut count = use_signal(|| 0);
+    let metadata = use_resource(|| async move { crate::api::requests::fetch_metadata().await });
 
     rsx! {
-        Link {
-            to: Route::Blog {
-                id: count()
-            },
-            "Go to blog"
+        div {
+            id: "header",
+            "Infinity Army List Builder"
         }
         div {
-            h1 { "High-Five counter: {count}" }
-            button { onclick: move |_| count += 1, "Up high!" }
-            button { onclick: move |_| count -= 1, "Down low!" }
+            id: "screen",
+            div {
+                id: "armies_list",
+                "Armies"
+                // tracing::logger::info!("{armies}");
+                match &*metadata.read_unchecked() {
+                    Some(Ok(metadata)) =>
+                    {
+                        rsx!{
+                        for faction in &metadata.factions {
+                            div {
+                                "Plop"
+                                "{faction.name}"
+                            }}
+                        }
+                    },
+                    Some(Err(_)) =>
+                    {
+                        info!("plop");
+                        rsx! {
+                        div { "Loading dogs failed" }
+                    }},
+                    None => rsx! {
+                        div { "Loading dogs..." }
+                    },
+                }
+            }
+            div {
+                "Plop"
+            }
         }
     }
 }

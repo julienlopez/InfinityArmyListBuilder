@@ -8,10 +8,12 @@ edition = "2021"
 
 [dependencies]
 
-dioxus = { version = "0.5", features = ["web", "router"] }
+dioxus = { version = "0.6.1", features = ["web", "router"] }
 
 # Debug
-dioxus-logger = "0.5.1"
+dioxus-logger = "0.6"
+reqwest = { version = "0.12.15", features = ["json"] }
+serde = { version = "1.0.219", features = ["serde_derive"] }
 
 [profile]
 
