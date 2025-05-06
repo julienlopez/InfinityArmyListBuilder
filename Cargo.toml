@@ -1,5 +1,5 @@
 [package]
-name = "infinity-army-list-builder"
+name = "test_fullstack_request"
 version = "0.1.0"
 authors = ["Julien Lopez <julien.lopez51@gmail.com>"]
 edition = "2021"
@@ -7,13 +7,20 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
-dioxus = { version = "0.6.1", features = ["web", "router"] }
-
-# Debug
-dioxus-logger = "0.6"
-reqwest = { version = "0.12.15", features = ["json"] }
+dioxus = { version = "0.6.0", features = ["router", "fullstack"] }
+reqwest = { version = "0.12.15", features = ["json"], optional = true }
 serde = { version = "1.0.219", features = ["serde_derive"] }
+tokio = { version = "1", features = ["full"], optional = true }
+
+[features]
+default = ["web"]
+# The feature that are only required for the web = ["dioxus/web"] build target should be optional and only enabled in the web = ["dioxus/web"] feature
+web = ["dioxus/web"]
+# The feature that are only required for the desktop = ["dioxus/desktop"] build target should be optional and only enabled in the desktop = ["dioxus/desktop"] feature
+desktop = ["dioxus/desktop"]
+# The feature that are only required for the mobile = ["dioxus/mobile"] build target should be optional and only enabled in the mobile = ["dioxus/mobile"] feature
+mobile = ["dioxus/mobile"]
+server = ["dioxus/server", "dep:reqwest", "dep:tokio"]
 
 [profile]
 

@@ -1,72 +1,70 @@
-#![allow(non_snake_case)]
+// The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
+// need dioxus
+use dioxus::prelude::*;
+
+use views::{ArmyList, Blog, Home, Navbar};
+
+/// Define a components module that contains all shared components for our app.
+mod components;
+/// Define a views module that contains the UI for all Layouts and Routes for our app.
+mod views;
 
 mod api;
 
-use dioxus::prelude::*;
-use dioxus_logger::tracing::{info, Level};
-
-#[derive(Clone, Routable, Debug, PartialEq)]
+/// The Route enum is used to define the structure of internal routes in our app. All route enums need to derive
+/// the [`Routable`] trait, which provides the necessary methods for the router to work.
+/// 
+/// Each variant represents a different URL pattern that can be matched by the router. If that pattern is matched,
+/// the components for that route will be rendered.
+#[derive(Debug, Clone, Routable, PartialEq)]
+#[rustfmt::skip]
 enum Route {
-    #[route("/")]
-    Home {},
+    // The layout attribute defines a wrapper for all routes under the layout. Layouts are great for wrapping
+    // many routes with a common UI like a navbar.
+    #[layout(Navbar)]
+        // The route attribute defines the URL pattern that a specific route matches. If that pattern matches the URL,
+        // the component for that route will be rendered. The component name that is rendered defaults to the variant name.
+        #[route("/")]
+        Home {},
+        // The route attribute can include dynamic parameters that implement [`std::str::FromStr`] and [`std::fmt::Display`] with the `:` syntax.
+        // In this case, id will match any integer like `/blog/123` or `/blog/-456`.
+        #[route("/blog/:id")]
+        // Fields of the route variant will be passed to the component as props. In this case, the blog component must accept
+        // an `id` prop of type `i32`.
+        Blog { id: i32 },
+
+        #[route("/army_list")]
+        ArmyList {}
 }
+
+// We can import assets in dioxus with the `asset!` macro. This macro takes a path to an asset relative to the crate root.
+// The macro returns an `Asset` type that will display as the path to the asset in the browser or a local path in desktop bundles.
+const FAVICON: Asset = asset!("/assets/favicon.ico");
+// The asset macro also minifies some assets like CSS and JS to make bundled smaller
+const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 
 fn main() {
-    // Init logger
-    dioxus_logger::init(Level::INFO).expect("failed to init logger");
-    info!("starting app");
-    launch(App);
+    // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
+    // you have enabled
+    dioxus::launch(App);
 }
 
-static CSS: Asset = asset!("/assets/main.css");
-
-fn App() -> Element {
-    rsx! {
-        document::Stylesheet { href: CSS }
-        Router::<Route> {}
-    }
-}
-
+/// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function
+/// that takes some props and returns an Element. In this case, App takes no props because it is the root of our app.
+///
+/// Components should be annotated with `#[component]` to support props, better error messages, and autocomplete
 #[component]
-fn Home() -> Element {
-    let metadata = use_resource(|| async move { crate::api::requests::fetch_metadata().await });
-
+fn App() -> Element {
+    // The `rsx!` macro lets us define HTML inside of rust. It expands to an Element with all of our HTML inside.
     rsx! {
-        div {
-            id: "header",
-            "Infinity Army List Builder"
-        }
-        div {
-            id: "screen",
-            div {
-                id: "armies_list",
-                "Armies"
-                // tracing::logger::info!("{armies}");
-                match &*metadata.read_unchecked() {
-                    Some(Ok(metadata)) =>
-                    {
-                        rsx!{
-                        for faction in &metadata.factions {
-                            div {
-                                "Plop"
-                                "{faction.name}"
-                            }}
-                        }
-                    },
-                    Some(Err(_)) =>
-                    {
-                        info!("plop");
-                        rsx! {
-                        div { "Loading dogs failed" }
-                    }},
-                    None => rsx! {
-                        div { "Loading dogs..." }
-                    },
-                }
-            }
-            div {
-                "Plop"
-            }
-        }
+        // In addition to element and text (which we will see later), rsx can contain other components. In this case,
+        // we are using the `document::Link` component to add a link to our favicon and main CSS file into the head of our app.
+        document::Link { rel: "icon", href: FAVICON }
+        document::Link { rel: "stylesheet", href: MAIN_CSS }
+
+
+        // The router component renders the route enum we defined above. It will handle synchronization of the URL and render
+        // the layouts and components for the active route.
+        Router::<Route> {}
     }
 }

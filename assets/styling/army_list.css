@@ -1,0 +1,13 @@
+#screen {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    align-content: stretch;
+
+    height: 100%;
+}
+
+#armies_list {
+    width: 20%;
+    text-align: center;
+}

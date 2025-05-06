@@ -1,4 +1,6 @@
-#[derive(Debug, serde::Deserialize)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Metadata {
     pub factions: Vec<Faction>,
     // pub ammunitions: Vec<Ammunition>,
@@ -11,7 +13,7 @@ pub struct Metadata {
     // pub booty: Vec<Booty>,
 }
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Faction {
     pub id: u64,
     pub parent: u64,
