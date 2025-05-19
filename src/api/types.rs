@@ -22,3 +22,27 @@ pub struct Faction {
     pub discontinued: bool,
     pub logo: String,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FactionData {
+    pub version: String,
+    pub units: Vec<Unit>,
+    pub resume: Vec<Resume>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Unit {
+    pub id: u64,
+    pub idArmy: u64,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Resume {
+    pub id: u64,
+    pub idArmy: u64,
+    pub name: String,
+    pub logo: String,
+    pub r#type: u64,
+    pub category: u64,
+}

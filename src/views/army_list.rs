@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use closure::closure;
 
-use crate::api::types::{Faction, Metadata};
+use crate::api::types::{Faction, FactionData, Metadata};
 
 const ARMY_LIST_CSS: Asset = asset!("/assets/styling/army_list.css");
 
@@ -67,16 +67,23 @@ fn FactionList(
 }
 
 #[component]
-fn TroopList(selected_faction: Signal<Option<u64>>) -> Element {
+fn TroopList(selected_faction: u64) -> Element {
+    let faction_data = use_server_future(move || fetch_faction_data(selected_faction))?;
     rsx! {
         div { class: "faction_troop_selection",
-            match &*selected_faction.read() {
-                Some(faction_id) => {
-                    rsx! {
-                        div { "{faction_id}" }
+            match &*faction_data.read_unchecked() {
+                Some(Ok(fac)) => rsx! {
+                    for (unit , resume) in std::iter::zip(&fac.units, &fac.resume) {
+                        div {
+                            img { class: "unit_logo", src: "{resume.logo}" }
+                            span { class: "unit_name", "{unit.name}" }
+                        }
                     }
-                }
-                None => rsx! { "Plop" },
+                },
+                Some(Err(err)) => rsx! {
+                "Error : {err:?}"
+                },
+                None => rsx! { "Ongoing" },
             }
         }
     }
@@ -91,22 +98,36 @@ fn CurrentArmyList() -> Element {
 
 #[component]
 pub fn ArmyList() -> Element {
-    let metadata = use_server_future(echo_server)?;
+    let metadata = use_server_future(fetch_game_metadata)?;
     let unrolled_faction: Signal<Option<u64>> = use_signal(|| None);
     let selected_faction: Signal<Option<u64>> = use_signal(|| None);
     rsx! {
         document::Link { rel: "stylesheet", href: ARMY_LIST_CSS }
         div { id: "screen",
             FactionList { metadata, unrolled_faction, selected_faction }
-            TroopList { selected_faction }
+            match *selected_faction.read() {
+                Some(fac) => rsx! {
+                    TroopList { selected_faction: fac }
+                },
+                None => rsx! {
+                    div {}
+                },
+            }
             CurrentArmyList {}
         }
     }
 }
 
 #[server]
-async fn echo_server() -> Result<Metadata, ServerFnError> {
+async fn fetch_game_metadata() -> Result<Metadata, ServerFnError> {
     crate::api::requests::fetch_metadata()
+        .await
+        .map_err(|e| ServerFnError::ServerError(format!("{e:?}")))
+}
+
+#[server]
+async fn fetch_faction_data(faction: u64) -> Result<FactionData, ServerFnError> {
+    crate::api::requests::fetch_faction_data(faction)
         .await
         .map_err(|e| ServerFnError::ServerError(format!("{e:?}")))
 }

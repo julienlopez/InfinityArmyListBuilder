@@ -32,3 +32,9 @@
 .current_army_list {
     padding: 5px;
 }
+
+.unit_logo {
+    width: 50px;
+    vertical-align: middle;
+    margin-right: 10px;
+}

@@ -1,4 +1,4 @@
-use super::types::Metadata;
+use super::types::{FactionData, Metadata};
 use std::error::Error;
 
 async fn get_api(url: &str) -> Result<reqwest::Response, reqwest::Error> {
@@ -14,7 +14,7 @@ pub async fn fetch_metadata() -> Result<Metadata, Box<dyn Error>> {
     Ok(get_api(url).await?.json().await?)
 }
 
-pub async fn fetch_army(id: u64) -> Result<(), Box<dyn Error>> {
+pub async fn fetch_faction_data(id: u64) -> Result<FactionData, Box<dyn Error>> {
     let url = format!("https://api.corvusbelli.com/army/units/en/{id}");
     Ok(get_api(&url).await?.json().await?)
 }
