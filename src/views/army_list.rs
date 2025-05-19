@@ -27,53 +27,79 @@ fn on_high_level_faction_clicked(faction: u64, mut unrolled_faction: Signal<Opti
 }
 
 #[component]
-pub fn ArmyList() -> Element {
-    let metadata = use_server_future(echo_server)?;
-    let unrolled_faction: Signal<Option<u64>> = use_signal(|| None);
-    let mut selected_faction: Signal<Option<u64>> = use_signal(|| None);
+fn FactionList(
+    metadata: Resource<Result<Metadata, ServerFnError>>,
+    unrolled_faction: Signal<Option<u64>>,
+    selected_faction: Signal<Option<u64>>,
+) -> Element {
     rsx! {
-        document::Link { rel: "stylesheet", href: ARMY_LIST_CSS }
-        div { id: "screen",
-            div { id: "armies_list",
-                match &*metadata.read_unchecked() {
-                    Some(Ok(metadata)) => rsx! {
-                        "Armies"
-                        for faction in metadata.factions.iter().filter(|f| is_high_level_faction(f)) {
-                            div {
-                                class: "army_selection high_level",
-                                onclick: closure!(
-                                    clone faction, clone mut unrolled_faction, | _ | {
-                                    on_high_level_faction_clicked(faction.id, unrolled_faction.clone()); }
-                                ),
-                                "{faction.name}"
-                            }
-                            if *unrolled_faction.read() == Some(faction.id) {
-                                for faction in metadata.factions.iter().filter(|f| f.parent == faction.id) {
-                                    div {
-                                        class: "army_selection",
-                                        onclick: closure!(clone faction, | _ | { * selected_faction.write() = Some(faction.id); }),
-                                        "{faction.name}"
-                                    }
+        div { id: "armies_list",
+            match &*metadata.read_unchecked() {
+                Some(Ok(metadata)) => rsx! {
+                    "Armies"
+                    for faction in metadata.factions.iter().filter(|f| is_high_level_faction(f)) {
+                        div {
+                            class: "army_selection high_level",
+                            onclick: closure!(
+                                clone faction, clone mut unrolled_faction, | _ | {
+                                on_high_level_faction_clicked(faction.id, unrolled_faction.clone()); }
+                            ),
+                            "{faction.name}"
+                        }
+                        if *unrolled_faction.read() == Some(faction.id) {
+                            for faction in metadata.factions.iter().filter(|f| f.parent == faction.id) {
+                                div {
+                                    class: "army_selection",
+                                    onclick: closure!(clone faction, | _ | { * selected_faction.write() = Some(faction.id); }),
+                                    "{faction.name}"
                                 }
                             }
                         }
-                    },
-                    Some(Err(err)) => rsx! {
-                    "Error : {err:?}"
-                    },
-                    None => rsx! { "Ongoing" },
-                }
-            }
-            div {
-                match &*selected_faction.read() {
-                    Some(faction_id) => {
-                        rsx! {
-                            div { "{faction_id}" }
-                        }
                     }
-                    None => rsx! { "Plop" },
-                }
+                },
+                Some(Err(err)) => rsx! {
+                "Error : {err:?}"
+                },
+                None => rsx! { "Ongoing" },
             }
+        }
+    }
+}
+
+#[component]
+fn TroopList(selected_faction: Signal<Option<u64>>) -> Element {
+    rsx! {
+        div { class: "faction_troop_selection",
+            match &*selected_faction.read() {
+                Some(faction_id) => {
+                    rsx! {
+                        div { "{faction_id}" }
+                    }
+                }
+                None => rsx! { "Plop" },
+            }
+        }
+    }
+}
+
+#[component]
+fn CurrentArmyList() -> Element {
+    rsx! {
+        div { class: "current_army_list" }
+    }
+}
+
+#[component]
+pub fn ArmyList() -> Element {
+    let metadata = use_server_future(echo_server)?;
+    let unrolled_faction: Signal<Option<u64>> = use_signal(|| None);
+    let selected_faction: Signal<Option<u64>> = use_signal(|| None);
+    rsx! {
+        document::Link { rel: "stylesheet", href: ARMY_LIST_CSS }
+        div { id: "screen",
+            FactionList { metadata, unrolled_faction, selected_faction }
+            TroopList { selected_faction }
+            CurrentArmyList {}
         }
     }
 }

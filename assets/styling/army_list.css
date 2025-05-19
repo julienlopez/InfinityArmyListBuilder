@@ -24,3 +24,11 @@
 .army_selection:hover {
     background-color: darkslategray;
 }
+
+.faction_troop_selection {
+    padding: 5px;
+}
+
+.current_army_list {
+    padding: 5px;
+}
