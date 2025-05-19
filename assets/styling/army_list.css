@@ -17,6 +17,10 @@
     cursor: pointer;
 }
 
+.high_level {
+    background-color: dimgrey;
+}
+
 .army_selection:hover {
     background-color: darkslategray;
 }
