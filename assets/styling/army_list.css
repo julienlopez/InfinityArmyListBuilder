@@ -38,3 +38,7 @@
     vertical-align: middle;
     margin-right: 10px;
 }
+
+.troop_details tr td {
+    text-align: center;
+}

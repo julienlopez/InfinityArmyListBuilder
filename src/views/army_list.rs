@@ -2,7 +2,7 @@ use dioxus::prelude::*;
 
 use closure::closure;
 
-use crate::api::types::{Faction, FactionData, Metadata};
+use crate::api::types::{Faction, FactionData, Metadata, Profile, Resume, Unit};
 
 const ARMY_LIST_CSS: Asset = asset!("/assets/styling/army_list.css");
 
@@ -74,16 +74,72 @@ fn TroopList(selected_faction: u64) -> Element {
             match &*faction_data.read_unchecked() {
                 Some(Ok(fac)) => rsx! {
                     for (unit , resume) in std::iter::zip(&fac.units, &fac.resume) {
-                        div {
-                            img { class: "unit_logo", src: "{resume.logo}" }
-                            span { class: "unit_name", "{unit.name}" }
-                        }
+                        TroopBox { unit: unit.clone(), resume: resume.clone() }
                     }
                 },
                 Some(Err(err)) => rsx! {
                 "Error : {err:?}"
                 },
                 None => rsx! { "Ongoing" },
+            }
+        }
+    }
+}
+
+#[component]
+fn TroopBox(unit: Unit, resume: Resume) -> Element {
+    let mut is_deployed = use_signal(|| false);
+    rsx! {
+        div { onclick: move |_| is_deployed.toggle(),
+            img { class: "unit_logo", src: "{resume.logo}" }
+            span { class: "unit_name", "{unit.name}" }
+        }
+        if *is_deployed.read() {
+            // TODO remove unwrap
+            TroopDetails {
+                profile: unit.profileGroups
+                    .iter()
+                    .nth(0)
+                    .and_then(|profile_group| profile_group.profiles.iter().nth(0))
+                    .unwrap()
+                    .clone(),
+            }
+        }
+    }
+}
+#[component]
+fn TroopDetails(profile: Profile) -> Element {
+    let move_c = profile
+        .r#move
+        .iter()
+        .map(|m| m.to_string())
+        .collect::<Vec<String>>()
+        .join("-");
+    rsx! {
+        table { class: "troop_details",
+            tr {
+                th { "MOV" }
+                th { "CC" }
+                th { "BS" }
+                th { "PH" }
+                th { "WIP" }
+                th { "ARM" }
+                th { "BTS" }
+                th { "VITA" }
+                th { "S" }
+                th { "AVA" }
+            }
+            tr {
+                td { "{move_c}" }
+                td { "{profile.cc}" }
+                td { "{profile.bs}" }
+                td { "{profile.ph}" }
+                td { "{profile.wip}" }
+                td { "{profile.arm}" }
+                td { "{profile.bts}" }
+                td { "{profile.w}" }
+                td { "{profile.s}" }
+                td { "{profile.ava}" }
             }
         }
     }
