@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-use crate::api::types::{FactionData, Profile, Resume, Unit};
+use crate::api::types::{Equipment, FactionData, Metadata, Profile, Resume, Skill, Unit, WikiItem};
 
 #[component]
 pub fn UnitsList(selected_faction: u64) -> Element {
@@ -84,11 +84,56 @@ fn UnitDetails(profile: Profile) -> Element {
                     td { "{profile.ava}" }
                 }
             }
-            div {
-                span { "Equipment:" }
+            EquipmentBox { equipment: profile.equip.clone() }
+            SkillsBox { skills: profile.skills.clone() }
+        }
+    }
+}
+
+#[component]
+fn EquipmentBox(equipment: Vec<Equipment>) -> Element {
+    let metadata = consume_context::<Metadata>();
+    rsx! {
+        div {
+            span { "Equipment:" }
+            for e in equipment {
+                WikiLinkLabel {
+                    label: metadata
+                        .equips
+                        .iter()
+                        .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
+                        .unwrap(),
+                }
             }
-            div {
-                span { "Skills:" }
+        }
+    }
+}
+
+#[component]
+fn WikiLinkLabel(label: WikiItem) -> Element {
+    rsx! {
+        if let Some(link) = label.wiki {
+            Link { class: "wiki_label clickable", to: link, new_tab: true, "{label.name}" }
+        } else {
+            span { class: "wiki_label", "{label.name}" }
+        }
+    }
+}
+
+#[component]
+fn SkillsBox(skills: Vec<Skill>) -> Element {
+    let metadata = consume_context::<Metadata>();
+    rsx! {
+        div {
+            span { "Skills:" }
+            for e in skills {
+                WikiLinkLabel {
+                    label: metadata
+                        .skills
+                        .iter()
+                        .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
+                        .unwrap(),
+                }
             }
         }
     }

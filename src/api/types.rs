@@ -13,7 +13,7 @@ pub struct Metadata {
     // pub booty: Vec<Booty>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct WikiItem {
     pub id: u64,
     pub name: String,
@@ -72,15 +72,15 @@ pub struct Profile {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Equipment {
-    id: u64,
-    order: u8,
+    pub id: u64,
+    pub order: u8,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Skill {
-    id: u64,
-    order: u8,
-    extra: Option<Vec<u64>>,
+    pub id: u64,
+    pub order: u8,
+    pub extra: Option<Vec<u64>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
