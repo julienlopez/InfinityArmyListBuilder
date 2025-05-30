@@ -107,39 +107,52 @@ fn TroopBox(unit: Unit, resume: Resume) -> Element {
         }
     }
 }
-#[component]
-fn TroopDetails(profile: Profile) -> Element {
-    let move_c = profile
+
+fn movement_string(profile: &Profile) -> String {
+    profile
         .r#move
         .iter()
         .map(|m| m.to_string())
         .collect::<Vec<String>>()
-        .join("-");
+        .join("-")
+}
+
+#[component]
+fn TroopDetails(profile: Profile) -> Element {
+    let move_c = movement_string(&profile);
     rsx! {
-        table { class: "troop_details",
-            tr {
-                th { "MOV" }
-                th { "CC" }
-                th { "BS" }
-                th { "PH" }
-                th { "WIP" }
-                th { "ARM" }
-                th { "BTS" }
-                th { "VITA" }
-                th { "S" }
-                th { "AVA" }
+        div {
+            table { class: "troop_details",
+                tr {
+                    th { "MOV" }
+                    th { "CC" }
+                    th { "BS" }
+                    th { "PH" }
+                    th { "WIP" }
+                    th { "ARM" }
+                    th { "BTS" }
+                    th { "VITA" }
+                    th { "S" }
+                    th { "AVA" }
+                }
+                tr {
+                    td { "{move_c}" }
+                    td { "{profile.cc}" }
+                    td { "{profile.bs}" }
+                    td { "{profile.ph}" }
+                    td { "{profile.wip}" }
+                    td { "{profile.arm}" }
+                    td { "{profile.bts}" }
+                    td { "{profile.w}" }
+                    td { "{profile.s}" }
+                    td { "{profile.ava}" }
+                }
             }
-            tr {
-                td { "{move_c}" }
-                td { "{profile.cc}" }
-                td { "{profile.bs}" }
-                td { "{profile.ph}" }
-                td { "{profile.wip}" }
-                td { "{profile.arm}" }
-                td { "{profile.bts}" }
-                td { "{profile.w}" }
-                td { "{profile.s}" }
-                td { "{profile.ava}" }
+            div {
+                span { "Equipment:" }
+            }
+            div {
+                span { "Skills:" }
             }
         }
     }

@@ -3,14 +3,21 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Metadata {
     pub factions: Vec<Faction>,
-    // pub ammunitions: Vec<Ammunition>,
+    pub ammunitions: Vec<WikiItem>,
     // pub weapons: Vec<Weapon>,
-    // pub skills: Vec<Skill>,
-    // pub equips: Vec<Equip>,
+    pub skills: Vec<WikiItem>,
+    pub equips: Vec<WikiItem>,
     // pub hack: Vec<Hack>,
     // pub martialArts: Vec<MartialArt>,
     // pub metachemistry: Vec<Metachemistry>,
     // pub booty: Vec<Booty>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct WikiItem {
+    pub id: u64,
+    pub name: String,
+    pub wiki: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,6 +66,21 @@ pub struct Profile {
     pub ph: i8,
     pub arm: i8,
     pub wip: i8,
+    pub equip: Vec<Equipment>,
+    pub skills: Vec<Skill>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Equipment {
+    id: u64,
+    order: u8,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Skill {
+    id: u64,
+    order: u8,
+    extra: Option<Vec<u64>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
