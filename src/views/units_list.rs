@@ -93,16 +93,17 @@ fn UnitDetails(profile: Profile) -> Element {
 #[component]
 fn EquipmentBox(equipment: Vec<Equipment>) -> Element {
     let metadata = consume_context::<Metadata>();
+    dioxus::logger::tracing::info!("Rendered with breed: ");
     rsx! {
         div {
             span { "Equipment:" }
             for e in equipment {
-                WikiLinkLabel {
-                    label: metadata
-                        .equips
-                        .iter()
-                        .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
-                        .unwrap(),
+                if let Some(label) = metadata
+                    .equips
+                    .iter()
+                    .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
+                {
+                    WikiLinkLabel { label }
                 }
             }
         }
@@ -127,12 +128,13 @@ fn SkillsBox(skills: Vec<Skill>) -> Element {
         div {
             span { "Skills:" }
             for e in skills {
-                WikiLinkLabel {
-                    label: metadata
-                        .skills
-                        .iter()
-                        .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
-                        .unwrap(),
+                if let Some(label) = metadata
+                    .skills
+                    .iter()
+                    .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
+                {
+
+                    WikiLinkLabel { label }
                 }
             }
         }
