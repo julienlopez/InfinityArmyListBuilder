@@ -11,11 +11,8 @@
 mod home;
 pub use home::Home;
 
-mod blog;
-pub use blog::Blog;
-
 mod navbar;
 pub use navbar::Navbar;
 
-mod army_list;
-pub use army_list::ArmyList;
+mod army_builder;
+pub use army_builder::ArmyBuilder;
