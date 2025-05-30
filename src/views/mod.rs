@@ -16,3 +16,7 @@ pub use navbar::Navbar;
 
 mod army_builder;
 pub use army_builder::ArmyBuilder;
+
+mod army_list;
+mod factions_list;
+mod units_list;
