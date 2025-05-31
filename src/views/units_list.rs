@@ -1,6 +1,9 @@
 use dioxus::prelude::*;
 
-use crate::api::types::{Equipment, FactionData, Metadata, Profile, Resume, Skill, Unit, WikiItem};
+use crate::api::types::{
+    Equipment, FactionData, Metadata, Profile, ProfileGroup, Resume, Skill, Unit, UnitOption,
+    Weapon, WeaponRef, WikiItem,
+};
 
 #[component]
 pub fn UnitsList(selected_faction: u64) -> Element {
@@ -32,14 +35,7 @@ fn UnitBox(unit: Unit, resume: Resume) -> Element {
         }
         if *is_deployed.read() {
             // TODO remove unwrap
-            UnitDetails {
-                profile: unit.profileGroups
-                    .iter()
-                    .nth(0)
-                    .and_then(|profile_group| profile_group.profiles.iter().nth(0))
-                    .unwrap()
-                    .clone(),
-            }
+            UnitDetails { profile_group: unit.profileGroups.iter().nth(0).unwrap().clone() }
         }
     }
 }
@@ -54,7 +50,8 @@ fn movement_string(profile: &Profile) -> String {
 }
 
 #[component]
-fn UnitDetails(profile: Profile) -> Element {
+fn UnitDetails(profile_group: ProfileGroup) -> Element {
+    let profile = profile_group.profiles.iter().nth(0).unwrap();
     let move_c = movement_string(&profile);
     rsx! {
         div {
@@ -86,6 +83,50 @@ fn UnitDetails(profile: Profile) -> Element {
             }
             EquipmentBox { equipment: profile.equip.clone() }
             SkillsBox { skills: profile.skills.clone() }
+            OptionsBox { options: profile_group.options.clone() }
+        }
+    }
+}
+
+fn generate_weapons_string(metadata: &Vec<Weapon>, weapons: &Vec<WeaponRef>) -> String {
+    itertools::join(
+        itertools::sorted(weapons).map(|w| {
+            metadata
+                .iter()
+                .find(|wmd| Some(wmd.id) == w.id)
+                .map(|wmd| wmd.name.clone())
+                .unwrap_or("ERROR".to_string())
+        }),
+        ", ",
+    )
+}
+
+#[component]
+fn OptionsBox(options: Vec<UnitOption>) -> Element {
+    let metadata = consume_context::<Metadata>();
+    rsx! {
+        div {
+            table { class: "unit_options_table",
+                tr {
+                    th { "Name" }
+                    th { "SWC" }
+                    th { "PTS" }
+                }
+                for option in itertools::sorted(options) {
+                    tr {
+                        td {
+                            "{option.name}"
+                            br {}
+                            "{ generate_weapons_string(&metadata.weapons, &option.weapons) }"
+                            if option.equip.len() > 0 {
+                                EquipmentBox { equipment: option.equip.clone() }
+                            }
+                        }
+                        td { "{option.swc}" }
+                        td { "{option.points}" }
+                    }
+                }
+            }
         }
     }
 }
@@ -93,7 +134,6 @@ fn UnitDetails(profile: Profile) -> Element {
 #[component]
 fn EquipmentBox(equipment: Vec<Equipment>) -> Element {
     let metadata = consume_context::<Metadata>();
-    dioxus::logger::tracing::info!("Rendered with breed: ");
     rsx! {
         div {
             span { "Equipment:" }

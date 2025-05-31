@@ -54,3 +54,11 @@
     cursor: pointer;
     color: inherit;
 }
+
+.unit_options_table tr {
+    background-color: dimgrey;
+}
+
+.unit_options_table tr:nth-child(even) {
+    background-color: darkgray;
+}
