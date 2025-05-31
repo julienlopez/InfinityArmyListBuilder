@@ -118,9 +118,7 @@ fn OptionsBox(options: Vec<UnitOption>) -> Element {
                             "{option.name}"
                             br {}
                             "{ generate_weapons_string(&metadata.weapons, &option.weapons) }"
-                            if option.equip.len() > 0 {
-                                EquipmentBox { equipment: option.equip.clone() }
-                            }
+                            EquipmentBox { equipment: option.equip.clone() }
                         }
                         td { "{option.swc}" }
                         td { "{option.points}" }
@@ -135,15 +133,17 @@ fn OptionsBox(options: Vec<UnitOption>) -> Element {
 fn EquipmentBox(equipment: Vec<Equipment>) -> Element {
     let metadata = consume_context::<Metadata>();
     rsx! {
-        div {
-            span { "Equipment:" }
-            for e in equipment {
-                if let Some(label) = metadata
-                    .equips
-                    .iter()
-                    .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
-                {
-                    WikiLinkLabel { label }
+        if !equipment.is_empty() {
+            div {
+                span { "Equipment:" }
+                for e in equipment {
+                    if let Some(label) = metadata
+                        .equips
+                        .iter()
+                        .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
+                    {
+                        WikiLinkLabel { label }
+                    }
                 }
             }
         }
@@ -165,16 +165,18 @@ fn WikiLinkLabel(label: WikiItem) -> Element {
 fn SkillsBox(skills: Vec<Skill>) -> Element {
     let metadata = consume_context::<Metadata>();
     rsx! {
-        div {
-            span { "Skills:" }
-            for e in skills {
-                if let Some(label) = metadata
-                    .skills
-                    .iter()
-                    .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
-                {
+        if !skills.is_empty() {
+            div {
+                span { "Skills:" }
+                for e in skills {
+                    if let Some(label) = metadata
+                        .skills
+                        .iter()
+                        .find_map(|eq| if eq.id == e.id { Some(eq.clone()) } else { None })
+                    {
 
-                    WikiLinkLabel { label }
+                        WikiLinkLabel { label }
+                    }
                 }
             }
         }
