@@ -25,7 +25,12 @@ pub fn UnitsList(selected_faction: u64) -> Element {
         div { class: "faction_troop_selection",
             match &*faction_data.read_unchecked() {
                 Some(Ok(fac)) => rsx! {
-                    for (unit , resume) in sort_units(std::iter::zip(&fac.units, &fac.resume).collect()) {
+                    for (unit , resume) in sort_units(
+                        std::iter::zip(&fac.units, &fac.resume)
+                            .filter(|(u, _)| u.factions.contains(&selected_faction))
+                            .collect(),
+                    )
+                    {
                         UnitBox { unit: unit.clone(), resume: resume.clone() }
                     }
                 },

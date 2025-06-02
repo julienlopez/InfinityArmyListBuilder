@@ -51,6 +51,7 @@ pub struct Unit {
     pub name: String,
     pub profileGroups: Vec<ProfileGroup>,
     pub filters: Filter,
+    pub factions: Vec<u64>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
