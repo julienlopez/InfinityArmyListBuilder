@@ -101,6 +101,19 @@ fn generate_weapons_string(metadata: &Vec<Weapon>, weapons: &Vec<WeaponRef>) -> 
     )
 }
 
+static ORDERS_ICONS: phf::Map<&str, Asset> = phf::phf_map! {
+    "REGULAR" => asset!("assets/images/orders/regular.png",
+        ImageAssetOptions::new().with_size(ImageSize::Manual {width: 24,height: 24})),
+    "LIEUTENANT" => asset!("assets/images/orders/lieutenant.png",
+        ImageAssetOptions::new().with_size(ImageSize::Manual {width: 24,height: 24})),
+    "IRREGULAR" => asset!("assets/images/orders/irregular.png",
+        ImageAssetOptions::new().with_size(ImageSize::Manual {width: 24,height: 24})),
+    "IMPETUOUS" => asset!("assets/images/orders/impetuous.png",
+        ImageAssetOptions::new().with_size(ImageSize::Manual {width: 24,height: 24})),
+    "TACTICAL" => asset!("assets/images/orders/tactical.png",
+        ImageAssetOptions::new().with_size(ImageSize::Manual {width: 24,height: 24}))
+};
+
 #[component]
 fn OptionsBox(options: Vec<UnitOption>) -> Element {
     let metadata = consume_context::<Metadata>();
@@ -108,12 +121,24 @@ fn OptionsBox(options: Vec<UnitOption>) -> Element {
         div {
             table { class: "unit_options_table",
                 tr {
+                    th {}
                     th { "Name" }
                     th { "SWC" }
                     th { "PTS" }
                 }
                 for option in itertools::sorted(options) {
                     tr {
+                        td { class: "unit_order_box",
+                            for order in option.orders {
+                                for o in itertools::repeat_n(&order.r#type, order.total.into()) {
+                                    img {
+                                        alt: o.clone(),
+                                        src: "{ORDERS_ICONS.get(&order.r#type).unwrap()}",
+                                    }
+                                    br {}
+                                }
+                            }
+                        }
                         td {
                             "{option.name}"
                             br {}

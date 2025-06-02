@@ -112,7 +112,14 @@ pub struct UnitOption {
     pub swc: String,
     pub weapons: Vec<WeaponRef>,
     pub equip: Vec<Equipment>,
+    pub orders: Vec<Order>,
     // pub skills: Vec<WikiItem>,
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub struct Order {
+    pub r#type: String,
+    pub total: u8,
 }
 
 impl Ord for UnitOption {

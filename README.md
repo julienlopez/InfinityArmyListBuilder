@@ -10,7 +10,7 @@ A small web app to build army list for infinity N5
 Run the following command in the root of the project to start the Dioxus dev server:
 
 ```bash
-dx serve --hot-reload
+dx serve --hot-reload true
 ```
 
 - Open the browser to http://localhost:8080
