@@ -5,6 +5,19 @@ use crate::api::types::{
     Weapon, WeaponRef, WikiItem,
 };
 
+fn unit_type(unit: &Unit) -> Option<u8> {
+    unit.profileGroups
+        .iter()
+        .nth(0)
+        .and_then(|p| p.profiles.iter().nth(0))
+        .map(|p| p.r#type)
+}
+
+fn sort_units<'a>(mut units: Vec<(&'a Unit, &'a Resume)>) -> Vec<(&'a Unit, &'a Resume)> {
+    units.sort_by(|(u1, _), (u2, _)| unit_type(u1).cmp(&unit_type(u2)));
+    units
+}
+
 #[component]
 pub fn UnitsList(selected_faction: u64) -> Element {
     let faction_data = use_server_future(move || fetch_faction_data(selected_faction))?;
@@ -12,7 +25,7 @@ pub fn UnitsList(selected_faction: u64) -> Element {
         div { class: "faction_troop_selection",
             match &*faction_data.read_unchecked() {
                 Some(Ok(fac)) => rsx! {
-                    for (unit , resume) in std::iter::zip(&fac.units, &fac.resume) {
+                    for (unit , resume) in sort_units(std::iter::zip(&fac.units, &fac.resume).collect()) {
                         UnitBox { unit: unit.clone(), resume: resume.clone() }
                     }
                 },
