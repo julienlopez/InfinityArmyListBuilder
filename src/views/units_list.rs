@@ -5,6 +5,19 @@ use crate::api::types::{
     Weapon, WeaponRef, WikiItem,
 };
 
+fn unit_type(unit: &Unit) -> Option<u8> {
+    unit.profileGroups
+        .iter()
+        .nth(0)
+        .and_then(|p| p.profiles.iter().nth(0))
+        .map(|p| p.r#type)
+}
+
+fn sort_units<'a>(mut units: Vec<(&'a Unit, &'a Resume)>) -> Vec<(&'a Unit, &'a Resume)> {
+    units.sort_by(|(u1, _), (u2, _)| unit_type(u1).cmp(&unit_type(u2)));
+    units
+}
+
 #[component]
 pub fn UnitsList(selected_faction: u64) -> Element {
     let faction_data = use_server_future(move || fetch_faction_data(selected_faction))?;
@@ -12,7 +25,12 @@ pub fn UnitsList(selected_faction: u64) -> Element {
         div { class: "faction_troop_selection",
             match &*faction_data.read_unchecked() {
                 Some(Ok(fac)) => rsx! {
-                    for (unit , resume) in std::iter::zip(&fac.units, &fac.resume) {
+                    for (unit , resume) in sort_units(
+                        std::iter::zip(&fac.units, &fac.resume)
+                            .filter(|(u, _)| u.factions.contains(&selected_faction))
+                            .collect(),
+                    )
+                    {
                         UnitBox { unit: unit.clone(), resume: resume.clone() }
                     }
                 },
@@ -25,17 +43,42 @@ pub fn UnitsList(selected_faction: u64) -> Element {
     }
 }
 
+fn unit_type_string(r#type: u8) -> &'static str {
+    if r#type == 1 {
+        "LI"
+    } else if r#type == 2 {
+        "MI"
+    } else if r#type == 3 {
+        "HI"
+    } else if r#type == 4 {
+        "TAG"
+    } else if r#type == 5 {
+        "REM"
+    } else if r#type == 6 {
+        "SK"
+    } else if r#type == 7 {
+        "WB"
+    } else {
+        "??"
+    }
+}
+
 #[component]
 fn UnitBox(unit: Unit, resume: Resume) -> Element {
     let mut is_deployed = use_signal(|| false);
+    // TODO remove unwraps
+    let unit_profile_group = unit.profileGroups.iter().nth(0).unwrap();
+    let unit_profile = unit_profile_group.profiles.iter().nth(0).unwrap();
     rsx! {
-        div { onclick: move |_| is_deployed.toggle(),
-            img { class: "unit_logo", src: "{resume.logo}" }
-            span { class: "unit_name", "{unit.name}" }
-        }
-        if *is_deployed.read() {
-            // TODO remove unwrap
-            UnitDetails { profile_group: unit.profileGroups.iter().nth(0).unwrap().clone() }
+        div { class: "unit_box",
+            div { class: "unit_header", onclick: move |_| is_deployed.toggle(),
+                img { class: "unit_logo", src: "{resume.logo}" }
+                span { class: "unit_name", "{unit.name}" }
+                span { class: "unit_type", "{unit_type_string(unit_profile.r#type)}" }
+            }
+            if *is_deployed.read() {
+                UnitDetails { profile_group: unit_profile_group.clone() }
+            }
         }
     }
 }

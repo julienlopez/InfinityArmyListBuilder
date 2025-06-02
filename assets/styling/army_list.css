@@ -62,3 +62,18 @@
 .unit_options_table tr:nth-child(even) {
     background-color: darkgray;
 }
+
+.unit_name {
+    flex-grow: 1;
+}
+
+.unit_header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.unit_box {
+    margin-bottom: 5px;
+}
