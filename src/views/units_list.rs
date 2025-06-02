@@ -25,17 +25,42 @@ pub fn UnitsList(selected_faction: u64) -> Element {
     }
 }
 
+fn unit_type_string(r#type: u8) -> &'static str {
+    if r#type == 1 {
+        "LI"
+    } else if r#type == 2 {
+        "MI"
+    } else if r#type == 3 {
+        "HI"
+    } else if r#type == 4 {
+        "TAG"
+    } else if r#type == 5 {
+        "REM"
+    } else if r#type == 6 {
+        "SK"
+    } else if r#type == 7 {
+        "WB"
+    } else {
+        "??"
+    }
+}
+
 #[component]
 fn UnitBox(unit: Unit, resume: Resume) -> Element {
     let mut is_deployed = use_signal(|| false);
+    // TODO remove unwraps
+    let unit_profile_group = unit.profileGroups.iter().nth(0).unwrap();
+    let unit_profile = unit_profile_group.profiles.iter().nth(0).unwrap();
     rsx! {
-        div { onclick: move |_| is_deployed.toggle(),
-            img { class: "unit_logo", src: "{resume.logo}" }
-            span { class: "unit_name", "{unit.name}" }
-        }
-        if *is_deployed.read() {
-            // TODO remove unwrap
-            UnitDetails { profile_group: unit.profileGroups.iter().nth(0).unwrap().clone() }
+        div { class: "unit_box",
+            div { class: "unit_header", onclick: move |_| is_deployed.toggle(),
+                img { class: "unit_logo", src: "{resume.logo}" }
+                span { class: "unit_name", "{unit.name}" }
+                span { class: "unit_type", "{unit_type_string(unit_profile.r#type)}" }
+            }
+            if *is_deployed.read() {
+                UnitDetails { profile_group: unit_profile_group.clone() }
+            }
         }
     }
 }
